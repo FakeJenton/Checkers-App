@@ -1,0 +1,292 @@
+.onlineGame {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  gap: 1rem;
+}
+
+.header {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: var(--bg-secondary);
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+}
+
+.roomInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.roomCode {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.label {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.code {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--accent-primary);
+}
+
+.copyButton {
+  padding: 0.5rem;
+  background: var(--bg-tertiary);
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.copyButton:hover {
+  background: var(--accent-primary);
+  transform: scale(1.1);
+}
+
+.copyButton:active {
+  transform: scale(0.95);
+}
+
+.connectionStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.connectionStatus.connected {
+  background: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+}
+
+.connectionStatus.connected .statusDot {
+  background: #28a745;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.connectionStatus.connecting {
+  background: rgba(255, 193, 7, 0.1);
+  color: #ffc107;
+}
+
+.connectionStatus.connecting .statusDot {
+  background: #ffc107;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+.connectionStatus.disconnected,
+.connectionStatus.error {
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+}
+
+.connectionStatus.disconnected .statusDot,
+.connectionStatus.error .statusDot {
+  background: #dc3545;
+}
+
+.playersInfo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.playerSlot {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--bg-primary);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  transition: all var(--transition-fast);
+}
+
+.playerSlot.you {
+  border-color: var(--accent-primary);
+}
+
+.playerPiece {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.playerSlot.red .playerPiece {
+  background: radial-gradient(circle at 30% 30%, var(--piece-red), var(--piece-red-border));
+  border: 2px solid var(--piece-red-border);
+}
+
+.playerSlot.black .playerPiece {
+  background: radial-gradient(circle at 30% 30%, #3a3a3a, var(--piece-black));
+  border: 2px solid var(--piece-black-border);
+}
+
+.playerName {
+  flex: 1;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.playerStatus {
+  color: #28a745;
+  font-size: 0.75rem;
+}
+
+.status {
+  width: 100%;
+  max-width: 600px;
+  text-align: center;
+}
+
+.currentPlayer {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1.125rem;
+  display: inline-block;
+}
+
+.currentPlayer.red {
+  background: rgba(220, 53, 69, 0.1);
+  color: var(--piece-red);
+  border: 2px solid var(--piece-red-border);
+}
+
+.currentPlayer.black {
+  background: rgba(52, 58, 64, 0.2);
+  color: var(--piece-black);
+  border: 2px solid var(--piece-black-border);
+}
+
+.waiting,
+.spectating {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  display: inline-block;
+}
+
+.waiting::after {
+  content: '';
+  animation: ellipsis 1.5s infinite;
+}
+
+.boardContainer {
+  position: relative;
+}
+
+.controls {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.controlButton {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.controlButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.controlButton:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.controlButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.controlButton.danger {
+  background: #dc3545;
+  color: white;
+}
+
+.controlButton.danger:hover:not(:disabled) {
+  background: #c82333;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes ellipsis {
+  0% {
+    content: '';
+  }
+  33% {
+    content: '.';
+  }
+  66% {
+    content: '..';
+  }
+  100% {
+    content: '...';
+  }
+}
+
+@media (max-width: 640px) {
+  .header {
+    padding: 0.75rem;
+  }
+
+  .playersInfo {
+    grid-template-columns: 1fr;
+  }
+
+  .code {
+    font-size: 1rem;
+  }
+
+  .onlineGame {
+    padding: 0.5rem;
+    gap: 0.75rem;
+  }
+}

@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Difficulty, GameSettings, Player } from './engine/types';
+import { Difficulty, GameSettings, Player, GameMode } from './engine/types';
 import { Splash } from './screens/Splash';
 import { Home } from './screens/Home';
 import { Game } from './screens/Game';
 import { Rules } from './screens/Rules';
 import { Settings } from './screens/Settings';
 import { DifficultySelect } from './screens/DifficultySelect';
+import { CreateRoom } from './screens/CreateRoom';
+import { JoinRoom } from './screens/JoinRoom';
+import { OnlineGame } from './screens/OnlineGame';
 import { Modal } from './components/Modal';
 import { Button } from './components/Button';
 
-type Screen = 'splash' | 'home' | 'game' | 'rules' | 'settings' | 'difficulty-select';
-type GameMode = 'local' | 'ai' | null;
+type Screen = 'splash' | 'home' | 'game' | 'rules' | 'settings' | 'difficulty-select' | 'online-menu' | 'create-room' | 'join-room' | 'online-game';
 
 const DEFAULT_SETTINGS: GameSettings = {
   mandatoryCaptures: true,
@@ -21,10 +23,12 @@ const DEFAULT_SETTINGS: GameSettings = {
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('splash');
-  const [gameMode, setGameMode] = useState<GameMode>(null);
+  const [gameMode, setGameMode] = useState<GameMode | null>(null);
   const [difficulty, setDifficulty] = useState<Difficulty>('casual');
   const [settings, setSettings] = useState<GameSettings>(DEFAULT_SETTINGS);
   const [winner, setWinner] = useState<Player | null>(null);
+  const [roomCode, setRoomCode] = useState<string>('');
+  const [preferredColor, setPreferredColor] = useState<Player>('red');
 
   useEffect(() => {
     const savedSettings = localStorage.getItem('kingme-settings');
@@ -61,9 +65,27 @@ function App() {
     setCurrentScreen('game');
   };
 
+  const handlePlayOnline = () => {
+    setCurrentScreen('online-menu');
+  };
+
+  const handleCreateRoom = (newRoomCode: string, color: Player) => {
+    setRoomCode(newRoomCode);
+    setPreferredColor(color);
+    setGameMode('online');
+    setCurrentScreen('online-game');
+  };
+
+  const handleJoinRoom = (newRoomCode: string) => {
+    setRoomCode(newRoomCode);
+    setGameMode('online');
+    setCurrentScreen('online-game');
+  };
+
   const handleQuitGame = () => {
     setGameMode(null);
     setWinner(null);
+    setRoomCode('');
     setCurrentScreen('home');
   };
 
@@ -84,6 +106,9 @@ function App() {
     if (gameMode === 'ai') {
       return winningPlayer === 'red' ? 'You earned it. King Me.' : 'Almost. Try again.';
     }
+    if (gameMode === 'online') {
+      return winningPlayer === preferredColor ? 'You earned it. King Me.' : 'Opponent earned it.';
+    }
     return winningPlayer === 'red' ? 'Red earned it. King Me.' : 'Black earned it. King Me.';
   };
 
@@ -97,6 +122,7 @@ function App() {
         <Home
           onPlayLocal={handlePlayLocal}
           onPlayAI={handlePlayAI}
+          onPlayOnline={handlePlayOnline}
           onShowRules={() => setCurrentScreen('rules')}
           onShowSettings={() => setCurrentScreen('settings')}
         />
@@ -109,7 +135,7 @@ function App() {
         />
       )}
 
-      {currentScreen === 'game' && gameMode && (
+      {currentScreen === 'game' && gameMode && (gameMode === 'local' || gameMode === 'ai') && (
         <Game
           mode={gameMode}
           difficulty={difficulty}
@@ -128,6 +154,46 @@ function App() {
           settings={settings}
           onUpdateSettings={handleUpdateSettings}
           onBack={() => setCurrentScreen('home')}
+        />
+      )}
+
+      {currentScreen === 'online-menu' && (
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%', maxWidth: '400px' }}>
+            <Button onClick={() => setCurrentScreen('create-room')} variant="primary">
+              Create Room
+            </Button>
+            <Button onClick={() => setCurrentScreen('join-room')} variant="primary">
+              Join Room
+            </Button>
+            <Button onClick={() => setCurrentScreen('home')} variant="secondary">
+              Back
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {currentScreen === 'create-room' && (
+        <CreateRoom
+          onRoomCreated={handleCreateRoom}
+          onBack={() => setCurrentScreen('online-menu')}
+        />
+      )}
+
+      {currentScreen === 'join-room' && (
+        <JoinRoom
+          onJoinRoom={handleJoinRoom}
+          onBack={() => setCurrentScreen('online-menu')}
+        />
+      )}
+
+      {currentScreen === 'online-game' && gameMode === 'online' && (
+        <OnlineGame
+          roomCode={roomCode}
+          preferredColor={preferredColor}
+          settings={settings}
+          onQuit={handleQuitGame}
+          onWin={handleWin}
         />
       )}
 

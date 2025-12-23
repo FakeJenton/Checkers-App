@@ -1,0 +1,5 @@
+{
+  "name": "king-me-checkers",
+  "main": "partykit/server.ts",
+  "compatibilityDate": "2024-01-01"
+}

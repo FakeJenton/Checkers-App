@@ -75,6 +75,9 @@ export function Game({ mode, difficulty = 'casual', settings, onQuit, onWin }: G
 
   const legalMoves = generateLegalMoves(gameState.board, gameState.currentPlayer, settings.mandatoryCaptures);
   const hasCaptureMove = legalMoves.some(move => move.captures.length > 0);
+  const lastMove = gameState.moveHistory.length > 0
+    ? gameState.moveHistory[gameState.moveHistory.length - 1]
+    : undefined;
 
   return (
     <div className={styles.game}>
@@ -100,6 +103,7 @@ export function Game({ mode, difficulty = 'casual', settings, onQuit, onWin }: G
           onMove={handleMove}
           showHints={settings.showHints}
           disabled={isAIThinking || gameState.winner !== null}
+          lastMove={lastMove}
         />
         {isAIThinking && (
           <div className={styles.thinking}>

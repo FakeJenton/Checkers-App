@@ -67,6 +67,17 @@
   border-color: var(--accent-hover);
 }
 
+.menuButton.online {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: #667eea;
+  color: white;
+}
+
+.menuButton.online:hover {
+  background: linear-gradient(135deg, #5568d3 0%, #653a8e 100%);
+  border-color: #5568d3;
+}
+
 .footer {
   margin-top: 60px;
   color: var(--text-muted);

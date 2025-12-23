@@ -9,6 +9,7 @@ interface BoardProps {
   onMove: (move: Move) => void;
   showHints: boolean;
   disabled?: boolean;
+  lastMove?: Move;
 }
 
 const CrownIcon = () => (
@@ -21,7 +22,7 @@ const CrownIcon = () => (
   </svg>
 );
 
-export function Board({ gameState, onMove, showHints, disabled = false }: BoardProps) {
+export function Board({ gameState, onMove, showHints, disabled = false, lastMove }: BoardProps) {
   const [selectedSquare, setSelectedSquare] = useState<Position | null>(null);
   const [validMoves, setValidMoves] = useState<Move[]>([]);
   const [justPromoted, setJustPromoted] = useState<Position | null>(null);
@@ -88,12 +89,16 @@ export function Board({ gameState, onMove, showHints, disabled = false }: BoardP
     const isValid = showHints && isSquareValid(row, col);
     const isSelected = isSquareSelected(row, col);
     const isJustPromoted = justPromoted && positionsEqual(justPromoted, { row, col });
+    const isLastMoveFrom = lastMove && positionsEqual(lastMove.from, { row, col });
+    const isLastMoveTo = lastMove && positionsEqual(lastMove.to, { row, col });
 
     const squareClasses = [
       styles.square,
       isLight ? styles.light : styles.dark,
       isValid && styles.valid,
       isSelected && styles.selected,
+      isLastMoveFrom && styles.lastMoveFrom,
+      isLastMoveTo && styles.lastMoveTo,
     ].filter(Boolean).join(' ');
 
     const pieceClasses = [

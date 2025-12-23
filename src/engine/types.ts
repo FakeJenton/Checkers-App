@@ -47,3 +47,36 @@ export interface GameSettings {
 }
 
 export type Difficulty = 'casual' | 'crown-match';
+
+// Online multiplayer types
+export type GameMode = 'local' | 'ai' | 'online';
+
+export interface OnlinePlayerInfo {
+  connected: boolean;
+  id: string;
+}
+
+export interface OnlineGameInfo {
+  roomCode: string;
+  yourColor: Player | 'spectator';
+  players: {
+    red: boolean;
+    black: boolean;
+  };
+}
+
+// Server message types
+export type ServerMessage =
+  | { type: 'state'; gameState: GameState; yourColor: Player | 'spectator'; players: { red: boolean; black: boolean } }
+  | { type: 'move'; move: Move; gameState: GameState }
+  | { type: 'player_joined'; player: Player }
+  | { type: 'player_left'; player: Player }
+  | { type: 'error'; message: string }
+  | { type: 'pong' };
+
+// Client message types
+export type ClientMessage =
+  | { type: 'join'; preferredColor?: Player }
+  | { type: 'move'; move: Move }
+  | { type: 'restart' }
+  | { type: 'ping' };

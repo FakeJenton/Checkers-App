@@ -52,6 +52,14 @@
   background-color: var(--highlight-selected) !important;
 }
 
+.square.lastMoveFrom {
+  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.5) inset;
+}
+
+.square.lastMoveTo {
+  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.8) inset;
+}
+
 .square.captureHighlight::after {
   content: '';
   position: absolute;
