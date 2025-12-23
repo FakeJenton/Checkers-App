@@ -3,7 +3,7 @@ import type { GameState, Move, Player, ServerMessage, ClientMessage } from '../e
 
 // PartyKit connection configuration
 const PARTYKIT_HOST = import.meta.env.PROD
-  ? 'king-me-checkers.fake-jenton.partykit.dev' // Production host
+  ? 'king-me-checkers.fakejenton.partykit.dev' // Production host
   : 'localhost:1999'; // Local development
 
 export type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'error';
