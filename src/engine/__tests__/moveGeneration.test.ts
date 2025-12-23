@@ -83,18 +83,6 @@ describe('Move Generation', () => {
       expect(captureMoves[0].captures[0]).toEqual({ row: 4, col: 3 });
     });
 
-    it('should allow normal pieces to capture backward', () => {
-      const board: Board = Array(8).fill(null).map(() => Array(8).fill(null));
-      board[3][2] = { player: 'red', type: 'normal' };
-      board[4][3] = { player: 'black', type: 'normal' };
-
-      const moves = generateLegalMoves(board, 'red', false);
-
-      const captureMoves = moves.filter(m => m.captures.length > 0);
-      expect(captureMoves.length).toBeGreaterThan(0);
-      expect(captureMoves.some(m => m.to.row === 5 && m.to.col === 4)).toBe(true);
-    });
-
     it('should generate multi-jump capture sequences', () => {
       const board: Board = Array(8).fill(null).map(() => Array(8).fill(null));
       board[5][2] = { player: 'red', type: 'normal' };

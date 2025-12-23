@@ -22,13 +22,9 @@ function generateCaptureMoves(
     // Kings can capture in all diagonal directions
     directions.push({ dr: -1, dc: -1 }, { dr: -1, dc: 1 }, { dr: 1, dc: -1 }, { dr: 1, dc: 1 });
   } else {
-    // Normal pieces capture diagonally forward
+    // Normal pieces can only capture diagonally forward
     const forward = piece.player === 'red' ? -1 : 1;
     directions.push({ dr: forward, dc: -1 }, { dr: forward, dc: 1 });
-
-    // Normal pieces can also capture backward
-    const backward = piece.player === 'red' ? 1 : -1;
-    directions.push({ dr: backward, dc: -1 }, { dr: backward, dc: 1 });
   }
 
   for (const { dr, dc } of directions) {
