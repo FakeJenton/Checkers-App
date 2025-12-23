@@ -1,5 +1,6 @@
 import PartySocket from 'partysocket';
 import type { GameState, Move, Player, ServerMessage, ClientMessage } from '../engine/types';
+import { getPlayerId } from '../utils/playerSession';
 
 // PartyKit connection configuration
 const PARTYKIT_HOST = import.meta.env.PROD
@@ -79,10 +80,11 @@ export class OnlineGameService {
         this.callbacks.onConnectionStatusChange?.('connected');
         this.reconnectAttempts = 0;
 
-        // Send join message
+        // Send join message with player ID
         this.sendMessage({
           type: 'join',
           preferredColor,
+          playerId: getPlayerId(),
         });
       });
 

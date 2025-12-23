@@ -76,7 +76,7 @@ export type ServerMessage =
 
 // Client message types
 export type ClientMessage =
-  | { type: 'join'; preferredColor?: Player }
+  | { type: 'join'; preferredColor?: Player; playerId: string }
   | { type: 'move'; move: Move }
   | { type: 'restart' }
   | { type: 'ping' };

@@ -37,9 +37,10 @@ interface GameState {
 interface RoomState {
   gameState: GameState | null;
   players: {
-    red: string | null;
-    black: string | null;
+    red: string | null; // Player ID (not connection ID)
+    black: string | null; // Player ID (not connection ID)
   };
+  playerConnections: Map<string, string>; // Map player ID to current connection ID
   spectators: Set<string>;
   createdAt: number;
   lastActivity: number;
@@ -47,7 +48,7 @@ interface RoomState {
 
 // Message types
 type ClientMessage =
-  | { type: 'join'; preferredColor?: 'red' | 'black' }
+  | { type: 'join'; preferredColor?: 'red' | 'black'; playerId: string }
   | { type: 'move'; move: Move }
   | { type: 'restart' }
   | { type: 'ping' };
@@ -77,6 +78,7 @@ export default class CheckersServer implements Party.Server {
         red: null,
         black: null,
       },
+      playerConnections: new Map(),
       spectators: new Set(),
       createdAt: Date.now(),
       lastActivity: Date.now(),
@@ -193,12 +195,21 @@ export default class CheckersServer implements Party.Server {
     };
   }
 
-  // Get player color by connection ID
-  private getPlayerColor(connectionId: string): Player | 'spectator' {
+  // Get player color by player ID
+  private getPlayerColor(playerId: string): Player | 'spectator' {
     const state = this.getRoomState();
-    if (state.players.red === connectionId) return 'red';
-    if (state.players.black === connectionId) return 'black';
+    if (state.players.red === playerId) return 'red';
+    if (state.players.black === playerId) return 'black';
     return 'spectator';
+  }
+
+  // Get player ID from connection ID
+  private getPlayerIdFromConnection(connectionId: string): string | null {
+    const state = this.getRoomState();
+    for (const [playerId, connId] of state.playerConnections.entries()) {
+      if (connId === connectionId) return playerId;
+    }
+    return null;
   }
 
   // Broadcast state to all connections
@@ -211,8 +222,9 @@ export default class CheckersServer implements Party.Server {
     });
 
     for (const connection of this.room.getConnections()) {
-      const yourColor = this.getPlayerColor(connection.id);
-      console.log(`[${this.room.id}] Sending to connection ${connection.id}: yourColor=${yourColor}`);
+      const playerId = this.getPlayerIdFromConnection(connection.id);
+      const yourColor = playerId ? this.getPlayerColor(playerId) : 'spectator';
+      console.log(`[${this.room.id}] Sending to connection ${connection.id} (player: ${playerId}): yourColor=${yourColor}`);
 
       const message: ServerMessage = {
         type: 'state',
@@ -246,45 +258,50 @@ export default class CheckersServer implements Party.Server {
 
       switch (msg.type) {
         case 'join': {
-          console.log(`[${this.room.id}] Join request from ${sender.id}, preferred: ${msg.preferredColor}`);
+          const playerId = msg.playerId;
+          const preferredColor = msg.preferredColor;
+
+          console.log(`[${this.room.id}] Join request from connection ${sender.id}, player ID: ${playerId}, preferred: ${preferredColor}`);
           console.log(`[${this.room.id}] Current state:`, {
             red: state.players.red,
             black: state.players.black,
-            spectators: Array.from(state.spectators)
+            connections: Array.from(state.playerConnections.entries())
           });
 
-          // Check if this connection is already assigned a player slot
-          const existingColor = this.getPlayerColor(sender.id);
+          // Update connection mapping
+          state.playerConnections.set(playerId, sender.id);
+
+          // Check if this player ID already has a slot assigned (reconnection)
+          const existingColor = this.getPlayerColor(playerId);
           if (existingColor !== 'spectator') {
-            // Already assigned, just broadcast current state
-            console.log(`[${this.room.id}] ${sender.id} already assigned as ${existingColor}, broadcasting`);
+            // Player is reconnecting to their existing slot
+            console.log(`[${this.room.id}] Player ${playerId} reconnecting as ${existingColor}`);
             this.broadcastState();
             break;
           }
 
-          // Assign player slot
-          const preferredColor = msg.preferredColor;
+          // New player - assign them to a slot
           let assignedColor: Player | 'spectator' = 'spectator';
 
           if (preferredColor && !state.players[preferredColor]) {
             // Assign preferred color if available
-            state.players[preferredColor] = sender.id;
+            state.players[preferredColor] = playerId;
             assignedColor = preferredColor;
-            console.log(`[${this.room.id}] Assigned ${sender.id} to preferred color ${preferredColor}`);
+            console.log(`[${this.room.id}] Assigned player ${playerId} to preferred color ${preferredColor}`);
           } else if (!state.players.red) {
             // Assign red if available
-            state.players.red = sender.id;
+            state.players.red = playerId;
             assignedColor = 'red';
-            console.log(`[${this.room.id}] Assigned ${sender.id} to red (first available)`);
+            console.log(`[${this.room.id}] Assigned player ${playerId} to red (first available)`);
           } else if (!state.players.black) {
             // Assign black if available
-            state.players.black = sender.id;
+            state.players.black = playerId;
             assignedColor = 'black';
-            console.log(`[${this.room.id}] Assigned ${sender.id} to black (second available)`);
+            console.log(`[${this.room.id}] Assigned player ${playerId} to black (second available)`);
           } else {
             // Make spectator
-            state.spectators.add(sender.id);
-            console.log(`[${this.room.id}] ${sender.id} made spectator (room full)`);
+            state.spectators.add(playerId);
+            console.log(`[${this.room.id}] Player ${playerId} made spectator (room full)`);
           }
 
           // Initialize game state if both players connected
@@ -318,7 +335,16 @@ export default class CheckersServer implements Party.Server {
             return;
           }
 
-          const playerColor = this.getPlayerColor(sender.id);
+          const playerId = this.getPlayerIdFromConnection(sender.id);
+          if (!playerId) {
+            sender.send(JSON.stringify({
+              type: 'error',
+              message: 'Player not found',
+            } as ServerMessage));
+            return;
+          }
+
+          const playerColor = this.getPlayerColor(playerId);
 
           if (playerColor === 'spectator') {
             sender.send(JSON.stringify({
@@ -347,7 +373,16 @@ export default class CheckersServer implements Party.Server {
         }
 
         case 'restart': {
-          const playerColor = this.getPlayerColor(sender.id);
+          const playerId = this.getPlayerIdFromConnection(sender.id);
+          if (!playerId) {
+            sender.send(JSON.stringify({
+              type: 'error',
+              message: 'Player not found',
+            } as ServerMessage));
+            return;
+          }
+
+          const playerColor = this.getPlayerColor(playerId);
 
           if (playerColor === 'spectator') {
             sender.send(JSON.stringify({
@@ -380,25 +415,22 @@ export default class CheckersServer implements Party.Server {
 
   onClose(connection: Party.Connection): void {
     const state = this.getRoomState();
-    const playerColor = this.getPlayerColor(connection.id);
+    const playerId = this.getPlayerIdFromConnection(connection.id);
 
-    console.log(`Connection ${connection.id} left room ${this.room.id}`);
+    console.log(`[${this.room.id}] Connection ${connection.id} (player: ${playerId}) disconnected`);
 
-    // Remove player
-    if (playerColor === 'red') {
-      state.players.red = null;
-      const leaveMessage: ServerMessage = { type: 'player_left', player: 'red' };
-      this.room.broadcast(JSON.stringify(leaveMessage));
-    } else if (playerColor === 'black') {
-      state.players.black = null;
-      const leaveMessage: ServerMessage = { type: 'player_left', player: 'black' };
-      this.room.broadcast(JSON.stringify(leaveMessage));
-    } else {
-      state.spectators.delete(connection.id);
+    if (playerId) {
+      // Remove connection mapping (but keep player slot for reconnection)
+      state.playerConnections.delete(playerId);
+      console.log(`[${this.room.id}] Removed connection mapping for player ${playerId}`);
+
+      // Note: We DON'T remove the player from their slot
+      // This allows them to reconnect and reclaim their spot
     }
 
     // Clean up if no connections left
     if (this.room.getConnections().length === 0) {
+      console.log(`[${this.room.id}] No connections left, cleaning up room state`);
       this.roomState = null;
     }
   }
