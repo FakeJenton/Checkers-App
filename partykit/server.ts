@@ -44,19 +44,19 @@ interface RoomState {
     black: string | null; // Player ID (not connection ID)
   };
   userIds: {
-    red: number | null; // Database user ID for red player
-    black: number | null; // Database user ID for black player
+    red: string | null; // Database user ID (UUID) for red player
+    black: string | null; // Database user ID (UUID) for black player
   };
   playerConnections: Map<string, string>; // Map player ID to current connection ID
   spectators: Set<string>;
   createdAt: number;
   lastActivity: number;
-  dbGameId: number | null; // Database game ID for recording
+  dbGameId: string | null; // Database game ID (UUID) for recording
 }
 
 // Message types
 type ClientMessage =
-  | { type: 'join'; preferredColor?: 'red' | 'black'; playerId: string; userId?: number }
+  | { type: 'join'; preferredColor?: 'red' | 'black'; playerId: string; userId?: string }
   | { type: 'move'; move: Move }
   | { type: 'restart' }
   | { type: 'ping' };
@@ -107,7 +107,7 @@ export default class CheckersServer implements Party.Server {
   }
 
   // API Helper: Create game in database
-  private async createGameInDB(redUserId: number | null, blackUserId: number | null): Promise<number | null> {
+  private async createGameInDB(redUserId: string | null, blackUserId: string | null): Promise<string | null> {
     // Only create game if at least one player is logged in
     if (!redUserId && !blackUserId) {
       console.log(`[${this.room.id}] No logged-in users, skipping game recording`);
@@ -143,7 +143,7 @@ export default class CheckersServer implements Party.Server {
   }
 
   // API Helper: Record move in database
-  private async recordMoveInDB(gameId: number, moveNumber: number, player: Player, move: Move): Promise<void> {
+  private async recordMoveInDB(gameId: string, moveNumber: number, player: Player, move: Move): Promise<void> {
     if (!gameId) return;
 
     try {
@@ -169,7 +169,7 @@ export default class CheckersServer implements Party.Server {
   }
 
   // API Helper: Complete game in database
-  private async completeGameInDB(gameId: number, winner: Player): Promise<void> {
+  private async completeGameInDB(gameId: string, winner: Player): Promise<void> {
     if (!gameId) return;
 
     try {

@@ -24,7 +24,7 @@ export class OnlineGameService {
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
-  private userId: number | undefined = undefined;
+  private userId: string | undefined = undefined;
   private preferredColor: Player | undefined = undefined;
 
   constructor(callbacks: OnlineGameCallbacks = {}) {
@@ -47,7 +47,7 @@ export class OnlineGameService {
   /**
    * Create a new game room
    */
-  createRoom(preferredColor?: Player, userId?: number): string {
+  createRoom(preferredColor?: Player, userId?: string): string {
     this.roomCode = OnlineGameService.generateRoomCode();
     this.userId = userId;
     this.connect(this.roomCode, preferredColor);
@@ -57,7 +57,7 @@ export class OnlineGameService {
   /**
    * Join an existing game room
    */
-  joinRoom(roomCode: string, preferredColor?: Player, userId?: number): void {
+  joinRoom(roomCode: string, preferredColor?: Player, userId?: string): void {
     this.roomCode = roomCode.toUpperCase().replace(/\s/g, '');
     this.userId = userId;
     this.connect(this.roomCode, preferredColor);
