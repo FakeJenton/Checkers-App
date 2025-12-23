@@ -141,8 +141,8 @@ export function Board({ gameState, onMove, showHints, disabled = false, lastMove
 
   const squares = [];
 
-  // Flip board if viewing from black's perspective (black pieces at bottom)
-  const shouldFlip = perspective === 'black';
+  // Flip board if viewing from red's perspective (red pieces at bottom)
+  const shouldFlip = perspective === 'red';
 
   for (let displayRow = 0; displayRow < 8; displayRow++) {
     for (let displayCol = 0; displayCol < 8; displayCol++) {
