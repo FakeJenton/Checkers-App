@@ -62,7 +62,7 @@ type ServerMessage =
 
 export default class CheckersServer implements Party.Server {
   options: Party.ServerOptions = {
-    hibernate: true,
+    hibernate: false, // Disable hibernation to prevent state loss
   };
 
   constructor(public room: Party.Room) {}
