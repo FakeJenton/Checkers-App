@@ -37,8 +37,8 @@ interface GameState {
 interface RoomState {
   gameState: GameState | null;
   players: {
-    red: { id: string; connection: Party.Connection } | null;
-    black: { id: string; connection: Party.Connection } | null;
+    red: string | null;
+    black: string | null;
   };
   spectators: Set<string>;
   createdAt: number;
@@ -196,8 +196,8 @@ export default class CheckersServer implements Party.Server {
   // Get player color by connection ID
   private getPlayerColor(connectionId: string): Player | 'spectator' {
     const state = this.getRoomState();
-    if (state.players.red?.id === connectionId) return 'red';
-    if (state.players.black?.id === connectionId) return 'black';
+    if (state.players.red === connectionId) return 'red';
+    if (state.players.black === connectionId) return 'black';
     return 'spectator';
   }
 
@@ -206,8 +206,8 @@ export default class CheckersServer implements Party.Server {
     const state = this.getRoomState();
 
     console.log(`[${this.room.id}] Broadcasting. Player IDs:`, {
-      red: state.players.red?.id,
-      black: state.players.black?.id
+      red: state.players.red,
+      black: state.players.black
     });
 
     for (const connection of this.room.getConnections()) {
@@ -232,8 +232,8 @@ export default class CheckersServer implements Party.Server {
     state.lastActivity = Date.now();
 
     console.log(`[${this.room.id}] Connection ${connection.id} joined. Current players:`, {
-      red: state.players.red?.id,
-      black: state.players.black?.id
+      red: state.players.red,
+      black: state.players.black
     });
   }
 
@@ -248,8 +248,8 @@ export default class CheckersServer implements Party.Server {
         case 'join': {
           console.log(`[${this.room.id}] Join request from ${sender.id}, preferred: ${msg.preferredColor}`);
           console.log(`[${this.room.id}] Current state:`, {
-            red: state.players.red?.id,
-            black: state.players.black?.id,
+            red: state.players.red,
+            black: state.players.black,
             spectators: Array.from(state.spectators)
           });
 
@@ -268,17 +268,17 @@ export default class CheckersServer implements Party.Server {
 
           if (preferredColor && !state.players[preferredColor]) {
             // Assign preferred color if available
-            state.players[preferredColor] = { id: sender.id, connection: sender };
+            state.players[preferredColor] = sender.id;
             assignedColor = preferredColor;
             console.log(`[${this.room.id}] Assigned ${sender.id} to preferred color ${preferredColor}`);
           } else if (!state.players.red) {
             // Assign red if available
-            state.players.red = { id: sender.id, connection: sender };
+            state.players.red = sender.id;
             assignedColor = 'red';
             console.log(`[${this.room.id}] Assigned ${sender.id} to red (first available)`);
           } else if (!state.players.black) {
             // Assign black if available
-            state.players.black = { id: sender.id, connection: sender };
+            state.players.black = sender.id;
             assignedColor = 'black';
             console.log(`[${this.room.id}] Assigned ${sender.id} to black (second available)`);
           } else {
