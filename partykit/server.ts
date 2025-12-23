@@ -97,20 +97,20 @@ export default class CheckersServer implements Party.Server {
   private createInitialGameState(): GameState {
     const board: Board = Array(8).fill(null).map(() => Array(8).fill(null));
 
-    // Initialize red pieces (rows 0-2) - Red at top
+    // Initialize black pieces (rows 0-2) - Black at top
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 8; col++) {
         if ((row + col) % 2 === 1) {
-          board[row][col] = { player: 'red', type: 'normal' };
+          board[row][col] = { player: 'black', type: 'normal' };
         }
       }
     }
 
-    // Initialize black pieces (rows 5-7) - Black at bottom
+    // Initialize red pieces (rows 5-7) - Red at bottom
     for (let row = 5; row < 8; row++) {
       for (let col = 0; col < 8; col++) {
         if ((row + col) % 2 === 1) {
-          board[row][col] = { player: 'black', type: 'normal' };
+          board[row][col] = { player: 'red', type: 'normal' };
         }
       }
     }

@@ -2,27 +2,27 @@ import { Board, GameState, Player } from './types';
 
 /**
  * Initialize a standard 8x8 checkers board.
- * Red pieces start at rows 0-2 (top)
- * Black pieces start at rows 5-7 (bottom)
+ * Black pieces start at rows 0-2 (top)
+ * Red pieces start at rows 5-7 (bottom)
  * Only dark squares (row + col is odd) contain pieces
  */
 export function createInitialBoard(): Board {
   const board: Board = Array(8).fill(null).map(() => Array(8).fill(null));
 
-  // Place red pieces (rows 0-2)
+  // Place black pieces (rows 0-2)
   for (let row = 0; row < 3; row++) {
     for (let col = 0; col < 8; col++) {
       if ((row + col) % 2 === 1) {
-        board[row][col] = { player: 'red', type: 'normal' };
+        board[row][col] = { player: 'black', type: 'normal' };
       }
     }
   }
 
-  // Place black pieces (rows 5-7)
+  // Place red pieces (rows 5-7)
   for (let row = 5; row < 8; row++) {
     for (let col = 0; col < 8; col++) {
       if ((row + col) % 2 === 1) {
-        board[row][col] = { player: 'black', type: 'normal' };
+        board[row][col] = { player: 'red', type: 'normal' };
       }
     }
   }

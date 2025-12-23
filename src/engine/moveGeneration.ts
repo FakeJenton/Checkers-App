@@ -23,8 +23,8 @@ function generateCaptureMoves(
     directions.push({ dr: -1, dc: -1 }, { dr: -1, dc: 1 }, { dr: 1, dc: -1 }, { dr: 1, dc: 1 });
   } else {
     // Normal pieces can only capture diagonally forward
-    // Red at rows 0-2 moves DOWN (positive), Black at rows 5-7 moves UP (negative)
-    const forward = piece.player === 'red' ? 1 : -1;
+    // Black at rows 0-2 moves DOWN (positive), Red at rows 5-7 moves UP (negative)
+    const forward = piece.player === 'black' ? 1 : -1;
     directions.push({ dr: forward, dc: -1 }, { dr: forward, dc: 1 });
   }
 
@@ -82,9 +82,9 @@ function generateCaptureMoves(
       const originalFrom = visitedSquares.length > 0 ? visitedSquares[0] : from;
 
       // Check if this move would result in a promotion
-      // Red at rows 0-2 promotes at row 7, Black at rows 5-7 promotes at row 0
+      // Black at rows 0-2 promotes at row 7, Red at rows 5-7 promotes at row 0
       const isPromotion = piece.type === 'normal' &&
-        ((piece.player === 'red' && landRow === 7) || (piece.player === 'black' && landRow === 0));
+        ((piece.player === 'black' && landRow === 7) || (piece.player === 'red' && landRow === 0));
 
       moves.push({
         from: originalFrom,
@@ -112,8 +112,8 @@ function generateNormalMoves(board: Board, from: Position, piece: Piece): Move[]
     directions.push({ dr: -1, dc: -1 }, { dr: -1, dc: 1 }, { dr: 1, dc: -1 }, { dr: 1, dc: 1 });
   } else {
     // Normal pieces move diagonally forward only
-    // Red at rows 0-2 moves DOWN (positive), Black at rows 5-7 moves UP (negative)
-    const forward = piece.player === 'red' ? 1 : -1;
+    // Black at rows 0-2 moves DOWN (positive), Red at rows 5-7 moves UP (negative)
+    const forward = piece.player === 'black' ? 1 : -1;
     directions.push({ dr: forward, dc: -1 }, { dr: forward, dc: 1 });
   }
 
@@ -126,9 +126,9 @@ function generateNormalMoves(board: Board, from: Position, piece: Piece): Move[]
     if (board[newRow][newCol] !== null) continue;
 
     // Check if this move would result in a promotion
-    // Red at rows 0-2 promotes at row 7, Black at rows 5-7 promotes at row 0
+    // Black at rows 0-2 promotes at row 7, Red at rows 5-7 promotes at row 0
     const isPromotion = piece.type === 'normal' &&
-      ((piece.player === 'red' && newRow === 7) || (piece.player === 'black' && newRow === 0));
+      ((piece.player === 'black' && newRow === 7) || (piece.player === 'red' && newRow === 0));
 
     moves.push({
       from,
