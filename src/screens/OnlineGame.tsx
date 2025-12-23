@@ -167,6 +167,7 @@ export function OnlineGame({ roomCode, preferredColor, settings, onQuit, onWin }
           showHints={settings.showHints && isYourTurn}
           disabled={!isYourTurn || waitingForOpponent || gameState.winner !== null}
           lastMove={lastMove}
+          perspective={yourColor === 'black' ? 'black' : 'red'}
         />
       </div>
 

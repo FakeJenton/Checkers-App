@@ -10,6 +10,7 @@ interface BoardProps {
   showHints: boolean;
   disabled?: boolean;
   lastMove?: Move;
+  perspective?: 'red' | 'black'; // Which player's perspective to render from
 }
 
 const CrownIcon = () => (
@@ -22,7 +23,7 @@ const CrownIcon = () => (
   </svg>
 );
 
-export function Board({ gameState, onMove, showHints, disabled = false, lastMove }: BoardProps) {
+export function Board({ gameState, onMove, showHints, disabled = false, lastMove, perspective = 'red' }: BoardProps) {
   const [selectedSquare, setSelectedSquare] = useState<Position | null>(null);
   const [validMoves, setValidMoves] = useState<Move[]>([]);
   const [justPromoted, setJustPromoted] = useState<Position | null>(null);
@@ -139,8 +140,15 @@ export function Board({ gameState, onMove, showHints, disabled = false, lastMove
   };
 
   const squares = [];
-  for (let row = 0; row < 8; row++) {
-    for (let col = 0; col < 8; col++) {
+
+  // Flip board if viewing from black's perspective (black pieces at bottom)
+  const shouldFlip = perspective === 'black';
+
+  for (let displayRow = 0; displayRow < 8; displayRow++) {
+    for (let displayCol = 0; displayCol < 8; displayCol++) {
+      // Convert display coordinates to board coordinates
+      const row = shouldFlip ? 7 - displayRow : displayRow;
+      const col = shouldFlip ? 7 - displayCol : displayCol;
       squares.push(renderSquare(row, col));
     }
   }
