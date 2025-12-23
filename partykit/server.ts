@@ -236,6 +236,14 @@ export default class CheckersServer implements Party.Server {
 
       switch (msg.type) {
         case 'join': {
+          // Check if this connection is already assigned a player slot
+          const existingColor = this.getPlayerColor(sender.id);
+          if (existingColor !== 'spectator') {
+            // Already assigned, just broadcast current state
+            this.broadcastState();
+            break;
+          }
+
           // Assign player slot
           const preferredColor = msg.preferredColor;
           let assignedColor: Player | 'spectator' = 'spectator';
