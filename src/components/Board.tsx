@@ -45,7 +45,13 @@ export function Board({ gameState, onMove, showHints, disabled = false, lastMove
   }, [gameState.moveHistory]);
 
   const handleSquareClick = (row: number, col: number) => {
-    if (disabled) return;
+    console.log('🎲 Square clicked:', row, col);
+    console.log('  disabled:', disabled);
+
+    if (disabled) {
+      console.log('❌ Board is disabled, ignoring click');
+      return;
+    }
 
     const position = { row, col };
     const piece = gameState.board[row][col];
@@ -53,6 +59,8 @@ export function Board({ gameState, onMove, showHints, disabled = false, lastMove
     // If clicking on a valid move destination
     const targetMove = validMoves.find(move => positionsEqual(move.to, position));
     if (targetMove && selectedSquare) {
+      console.log('✅ Valid move found, calling onMove');
+      console.log('  targetMove:', targetMove);
       onMove(targetMove);
       setSelectedSquare(null);
       setValidMoves([]);
@@ -61,6 +69,7 @@ export function Board({ gameState, onMove, showHints, disabled = false, lastMove
 
     // If clicking on own piece
     if (piece && piece.player === gameState.currentPlayer) {
+      console.log('📍 Selected piece at', position);
       setSelectedSquare(position);
       const moves = getMovesForPiece(
         gameState.board,
@@ -68,8 +77,11 @@ export function Board({ gameState, onMove, showHints, disabled = false, lastMove
         gameState.currentPlayer,
         gameState.mandatoryCaptures
       );
+      console.log('  valid moves:', moves.length);
+      console.log('  moves:', moves);
       setValidMoves(moves);
     } else {
+      console.log('  Deselecting (clicked empty or opponent piece)');
       setSelectedSquare(null);
       setValidMoves([]);
     }

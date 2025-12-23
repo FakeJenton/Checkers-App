@@ -55,9 +55,21 @@ export function OnlineGame({ roomCode, preferredColor, settings, onQuit, onWin }
   }, [roomCode, preferredColor, onlineService]);
 
   const handleMove = useCallback((move: Move) => {
-    if (yourColor === 'spectator') return;
-    if (gameState.currentPlayer !== yourColor) return;
+    console.log('🎯 handleMove called');
+    console.log('  yourColor:', yourColor);
+    console.log('  gameState.currentPlayer:', gameState.currentPlayer);
+    console.log('  move:', move);
 
+    if (yourColor === 'spectator') {
+      console.log('❌ Blocked: You are a spectator');
+      return;
+    }
+    if (gameState.currentPlayer !== yourColor) {
+      console.log('❌ Blocked: Not your turn');
+      return;
+    }
+
+    console.log('✅ Sending move to server');
     onlineService.sendMove(move);
   }, [yourColor, gameState.currentPlayer, onlineService]);
 
@@ -81,6 +93,15 @@ export function OnlineGame({ roomCode, preferredColor, settings, onQuit, onWin }
   const lastMove = gameState.moveHistory.length > 0
     ? gameState.moveHistory[gameState.moveHistory.length - 1]
     : undefined;
+
+  // Debug logging
+  console.log('🎮 OnlineGame state:');
+  console.log('  yourColor:', yourColor);
+  console.log('  currentPlayer:', gameState.currentPlayer);
+  console.log('  players:', players);
+  console.log('  isYourTurn:', isYourTurn);
+  console.log('  waitingForOpponent:', waitingForOpponent);
+  console.log('  board disabled:', !isYourTurn || waitingForOpponent || gameState.winner !== null);
 
   return (
     <div className={styles.onlineGame}>

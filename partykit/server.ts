@@ -327,7 +327,10 @@ export default class CheckersServer implements Party.Server {
         }
 
         case 'move': {
+          console.log(`[${this.room.id}] 📥 Move received from ${sender.id}`);
+
           if (!state.gameState) {
+            console.log(`[${this.room.id}] ❌ Game not started`);
             sender.send(JSON.stringify({
               type: 'error',
               message: 'Game not started',
@@ -336,7 +339,10 @@ export default class CheckersServer implements Party.Server {
           }
 
           const playerId = this.getPlayerIdFromConnection(sender.id);
+          console.log(`[${this.room.id}]   Player ID: ${playerId}`);
+
           if (!playerId) {
+            console.log(`[${this.room.id}] ❌ Player not found`);
             sender.send(JSON.stringify({
               type: 'error',
               message: 'Player not found',
@@ -345,8 +351,12 @@ export default class CheckersServer implements Party.Server {
           }
 
           const playerColor = this.getPlayerColor(playerId);
+          console.log(`[${this.room.id}]   Player color: ${playerColor}`);
+          console.log(`[${this.room.id}]   Current player: ${state.gameState.currentPlayer}`);
+          console.log(`[${this.room.id}]   Move:`, msg.move);
 
           if (playerColor === 'spectator') {
+            console.log(`[${this.room.id}] ❌ Spectators cannot make moves`);
             sender.send(JSON.stringify({
               type: 'error',
               message: 'Spectators cannot make moves',
@@ -355,7 +365,11 @@ export default class CheckersServer implements Party.Server {
           }
 
           // Validate move
-          if (!this.isMoveLegal(state.gameState, msg.move, playerColor)) {
+          const isLegal = this.isMoveLegal(state.gameState, msg.move, playerColor);
+          console.log(`[${this.room.id}]   Move legal: ${isLegal}`);
+
+          if (!isLegal) {
+            console.log(`[${this.room.id}] ❌ Illegal move`);
             sender.send(JSON.stringify({
               type: 'error',
               message: 'Illegal move',
@@ -364,6 +378,7 @@ export default class CheckersServer implements Party.Server {
           }
 
           // Apply move
+          console.log(`[${this.room.id}] ✅ Applying move`);
           state.gameState = this.applyMove(state.gameState, msg.move);
 
           // Broadcast updated state

@@ -76,7 +76,11 @@ export class OnlineGameService {
       });
 
       this.socket.addEventListener('open', () => {
-        console.log('Connected to room:', roomCode);
+        const playerId = getPlayerId();
+        console.log('🎮 Connected to room:', roomCode);
+        console.log('🆔 Player ID:', playerId);
+        console.log('🎨 Preferred color:', preferredColor);
+
         this.callbacks.onConnectionStatusChange?.('connected');
         this.reconnectAttempts = 0;
 
@@ -84,8 +88,10 @@ export class OnlineGameService {
         this.sendMessage({
           type: 'join',
           preferredColor,
-          playerId: getPlayerId(),
+          playerId,
         });
+
+        console.log('📤 Sent join message with player ID');
       });
 
       this.socket.addEventListener('message', (event) => {
@@ -156,6 +162,7 @@ export class OnlineGameService {
         break;
 
       case 'error':
+        console.error('❌ Server error:', message.message);
         this.callbacks.onError?.(message.message);
         break;
 
@@ -180,6 +187,7 @@ export class OnlineGameService {
    * Send a move to the server
    */
   sendMove(move: Move): void {
+    console.log('📤 Sending move to server:', move);
     this.sendMessage({
       type: 'move',
       move,
