@@ -1,0 +1,111 @@
+.settings {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+.container {
+  max-width: 600px;
+  width: 100%;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.title {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+}
+
+.content {
+  background: var(--bg-secondary);
+  border: 2px solid var(--bg-tertiary);
+  border-radius: 12px;
+  padding: 32px;
+  margin-bottom: 32px;
+}
+
+.setting {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--bg-tertiary);
+}
+
+.setting:last-child {
+  border-bottom: none;
+}
+
+.settingInfo {
+  flex: 1;
+}
+
+.settingLabel {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--text-primary);
+}
+
+.settingDescription {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.toggle {
+  position: relative;
+  width: 56px;
+  height: 28px;
+  background: var(--bg-tertiary);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.toggle.active {
+  background: var(--accent-primary);
+}
+
+.toggleKnob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 24px;
+  height: 24px;
+  background: var(--text-primary);
+  border-radius: 50%;
+  transition: transform var(--transition-fast);
+}
+
+.toggle.active .toggleKnob {
+  transform: translateX(28px);
+}
+
+.select {
+  padding: 8px 16px;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--bg-tertiary);
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.select:hover {
+  background: var(--bg-primary);
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}

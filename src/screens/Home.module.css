@@ -1,0 +1,74 @@
+.home {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.title {
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-weight: 900;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+}
+
+.subtitle {
+  font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.menuButton {
+  padding: 20px 32px;
+  font-size: 18px;
+  font-weight: 700;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 2px solid var(--bg-tertiary);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: var(--shadow-sm);
+}
+
+.menuButton:hover {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.menuButton.primary {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+.menuButton.primary:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.footer {
+  margin-top: 60px;
+  color: var(--text-muted);
+  font-size: 14px;
+}

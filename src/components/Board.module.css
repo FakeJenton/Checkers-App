@@ -1,0 +1,117 @@
+.board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  width: min(90vw, 90vh, 600px);
+  height: min(90vw, 90vh, 600px);
+  border: 3px solid var(--bg-tertiary);
+  box-shadow: var(--shadow-lg);
+  margin: 0 auto;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.square {
+  position: relative;
+  aspect-ratio: 1;
+  transition: background-color var(--transition-fast);
+}
+
+.square.light {
+  background-color: var(--board-light);
+}
+
+.square.dark {
+  background-color: var(--board-dark);
+}
+
+.square.valid {
+  cursor: pointer;
+}
+
+.square.valid::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 30%;
+  height: 30%;
+  background: var(--highlight-valid);
+  border-radius: 50%;
+  transition: all var(--transition-fast);
+}
+
+.square.valid:hover::after {
+  width: 40%;
+  height: 40%;
+  background: var(--highlight-selected);
+}
+
+.square.selected {
+  background-color: var(--highlight-selected) !important;
+}
+
+.square.captureHighlight::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50%;
+  height: 50%;
+  background: var(--highlight-capture);
+  border-radius: 50%;
+  animation: pulse 1s ease infinite;
+}
+
+.piece {
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  width: 80%;
+  height: 80%;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-md);
+}
+
+.piece:hover {
+  transform: scale(1.1);
+}
+
+.piece.red {
+  background: radial-gradient(circle at 30% 30%, var(--piece-red), var(--piece-red-border));
+  border: 2px solid var(--piece-red-border);
+}
+
+.piece.black {
+  background: radial-gradient(circle at 30% 30%, #3a3a3a, var(--piece-black));
+  border: 2px solid var(--piece-black-border);
+}
+
+.piece.selected {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 3px var(--accent-primary);
+}
+
+.piece.moving {
+  transition: all var(--transition-slow);
+  z-index: 10;
+}
+
+.crown {
+  width: 60%;
+  height: 60%;
+  animation: crown 0.6s ease;
+}
+
+.crown svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
