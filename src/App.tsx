@@ -28,7 +28,7 @@ function App() {
   const [settings, setSettings] = useState<GameSettings>(DEFAULT_SETTINGS);
   const [winner, setWinner] = useState<Player | null>(null);
   const [roomCode, setRoomCode] = useState<string>('');
-  const [preferredColor, setPreferredColor] = useState<Player>('red');
+  const [preferredColor, setPreferredColor] = useState<Player | undefined>(undefined);
 
   useEffect(() => {
     const savedSettings = localStorage.getItem('kingme-settings');
@@ -78,6 +78,7 @@ function App() {
 
   const handleJoinRoom = (newRoomCode: string) => {
     setRoomCode(newRoomCode);
+    setPreferredColor(undefined); // Let server auto-assign color
     setGameMode('online');
     setCurrentScreen('online-game');
   };
@@ -107,7 +108,8 @@ function App() {
       return winningPlayer === 'red' ? 'You earned it. King Me.' : 'Almost. Try again.';
     }
     if (gameMode === 'online') {
-      return winningPlayer === preferredColor ? 'You earned it. King Me.' : 'Opponent earned it.';
+      // For online games, show which color won
+      return winningPlayer === 'red' ? 'Red earned it. King Me.' : 'Black earned it. King Me.';
     }
     return winningPlayer === 'red' ? 'Red earned it. King Me.' : 'Black earned it. King Me.';
   };

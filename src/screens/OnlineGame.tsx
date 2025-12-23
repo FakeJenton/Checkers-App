@@ -7,7 +7,7 @@ import styles from './OnlineGame.module.css';
 
 interface OnlineGameProps {
   roomCode: string;
-  preferredColor: Player;
+  preferredColor?: Player;
   settings: GameSettings;
   onQuit: () => void;
   onWin: (winner: Player) => void;
