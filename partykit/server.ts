@@ -205,8 +205,15 @@ export default class CheckersServer implements Party.Server {
   private broadcastState() {
     const state = this.getRoomState();
 
+    console.log(`[${this.room.id}] Broadcasting. Player IDs:`, {
+      red: state.players.red?.id,
+      black: state.players.black?.id
+    });
+
     for (const connection of this.room.getConnections()) {
       const yourColor = this.getPlayerColor(connection.id);
+      console.log(`[${this.room.id}] Sending to connection ${connection.id}: yourColor=${yourColor}`);
+
       const message: ServerMessage = {
         type: 'state',
         gameState: state.gameState || this.createInitialGameState(),
@@ -224,7 +231,10 @@ export default class CheckersServer implements Party.Server {
     const state = this.getRoomState();
     state.lastActivity = Date.now();
 
-    console.log(`Connection ${connection.id} joined room ${this.room.id}`);
+    console.log(`[${this.room.id}] Connection ${connection.id} joined. Current players:`, {
+      red: state.players.red?.id,
+      black: state.players.black?.id
+    });
   }
 
   async onMessage(message: string, sender: Party.Connection): Promise<void> {
@@ -236,10 +246,18 @@ export default class CheckersServer implements Party.Server {
 
       switch (msg.type) {
         case 'join': {
+          console.log(`[${this.room.id}] Join request from ${sender.id}, preferred: ${msg.preferredColor}`);
+          console.log(`[${this.room.id}] Current state:`, {
+            red: state.players.red?.id,
+            black: state.players.black?.id,
+            spectators: Array.from(state.spectators)
+          });
+
           // Check if this connection is already assigned a player slot
           const existingColor = this.getPlayerColor(sender.id);
           if (existingColor !== 'spectator') {
             // Already assigned, just broadcast current state
+            console.log(`[${this.room.id}] ${sender.id} already assigned as ${existingColor}, broadcasting`);
             this.broadcastState();
             break;
           }
@@ -252,25 +270,31 @@ export default class CheckersServer implements Party.Server {
             // Assign preferred color if available
             state.players[preferredColor] = { id: sender.id, connection: sender };
             assignedColor = preferredColor;
+            console.log(`[${this.room.id}] Assigned ${sender.id} to preferred color ${preferredColor}`);
           } else if (!state.players.red) {
             // Assign red if available
             state.players.red = { id: sender.id, connection: sender };
             assignedColor = 'red';
+            console.log(`[${this.room.id}] Assigned ${sender.id} to red (first available)`);
           } else if (!state.players.black) {
             // Assign black if available
             state.players.black = { id: sender.id, connection: sender };
             assignedColor = 'black';
+            console.log(`[${this.room.id}] Assigned ${sender.id} to black (second available)`);
           } else {
             // Make spectator
             state.spectators.add(sender.id);
+            console.log(`[${this.room.id}] ${sender.id} made spectator (room full)`);
           }
 
           // Initialize game state if both players connected
           if (state.players.red && state.players.black && !state.gameState) {
             state.gameState = this.createInitialGameState();
+            console.log(`[${this.room.id}] Both players connected, initializing game`);
           }
 
           // Broadcast state to all
+          console.log(`[${this.room.id}] Broadcasting state to ${this.room.getConnections().length} connections`);
           this.broadcastState();
 
           // Notify about player join
