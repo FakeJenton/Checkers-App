@@ -24,6 +24,8 @@ export class OnlineGameService {
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+  private userId: number | undefined = undefined;
+  private preferredColor: Player | undefined = undefined;
 
   constructor(callbacks: OnlineGameCallbacks = {}) {
     this.callbacks = callbacks;
@@ -45,8 +47,9 @@ export class OnlineGameService {
   /**
    * Create a new game room
    */
-  createRoom(preferredColor?: Player): string {
+  createRoom(preferredColor?: Player, userId?: number): string {
     this.roomCode = OnlineGameService.generateRoomCode();
+    this.userId = userId;
     this.connect(this.roomCode, preferredColor);
     return this.roomCode;
   }
@@ -54,8 +57,9 @@ export class OnlineGameService {
   /**
    * Join an existing game room
    */
-  joinRoom(roomCode: string, preferredColor?: Player): void {
+  joinRoom(roomCode: string, preferredColor?: Player, userId?: number): void {
     this.roomCode = roomCode.toUpperCase().replace(/\s/g, '');
+    this.userId = userId;
     this.connect(this.roomCode, preferredColor);
   }
 
@@ -67,6 +71,7 @@ export class OnlineGameService {
       this.socket.close();
     }
 
+    this.preferredColor = preferredColor;
     this.callbacks.onConnectionStatusChange?.('connecting');
 
     try {
@@ -79,19 +84,21 @@ export class OnlineGameService {
         const playerId = getPlayerId();
         console.log('🎮 Connected to room:', roomCode);
         console.log('🆔 Player ID:', playerId);
+        console.log('👤 User ID:', this.userId);
         console.log('🎨 Preferred color:', preferredColor);
 
         this.callbacks.onConnectionStatusChange?.('connected');
         this.reconnectAttempts = 0;
 
-        // Send join message with player ID
+        // Send join message with player ID and optional user ID
         this.sendMessage({
           type: 'join',
           preferredColor,
           playerId,
+          userId: this.userId,
         });
 
-        console.log('📤 Sent join message with player ID');
+        console.log('📤 Sent join message with player ID and user ID');
       });
 
       this.socket.addEventListener('message', (event) => {
@@ -136,7 +143,7 @@ export class OnlineGameService {
     console.log(`Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
 
     this.reconnectTimeout = setTimeout(() => {
-      this.connect(roomCode, preferredColor);
+      this.connect(roomCode, this.preferredColor);
     }, delay);
   }
 

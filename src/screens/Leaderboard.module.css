@@ -1,0 +1,348 @@
+.leaderboard {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  padding: 2rem;
+  color: #fff;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.backButton {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.backButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.typeSelector {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 0.25rem;
+  width: fit-content;
+}
+
+.typeButton {
+  background: transparent;
+  border: none;
+  color: #999;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.typeButton.active {
+  background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+  color: #1a1a1a;
+}
+
+.typeButton:hover:not(.active) {
+  color: #fff;
+}
+
+.userRankBadge {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.2) 0%, rgba(244, 208, 63, 0.1) 100%);
+  border: 2px solid rgba(212, 175, 55, 0.3);
+  border-radius: 10px;
+  padding: 1rem 1.5rem;
+  text-align: center;
+  margin-bottom: 2rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #d4af37;
+}
+
+.loading, .error, .empty {
+  text-align: center;
+  padding: 3rem;
+  font-size: 1.2rem;
+  color: #999;
+}
+
+.error {
+  color: #ff6b6b;
+}
+
+.empty p {
+  margin: 0.5rem 0;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Podium Styles */
+.podium {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 2rem 1rem;
+}
+
+.podiumPlace {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  transition: transform 0.2s;
+}
+
+.podiumPlace:hover {
+  transform: translateY(-4px);
+}
+
+.podiumPlace.first {
+  order: 2;
+  border-color: rgba(212, 175, 55, 0.4);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(244, 208, 63, 0.1) 100%);
+  padding-top: 2rem;
+}
+
+.podiumPlace.second {
+  order: 1;
+  border-color: rgba(192, 192, 192, 0.3);
+}
+
+.podiumPlace.third {
+  order: 3;
+  border-color: rgba(205, 127, 50, 0.3);
+}
+
+.crown {
+  font-size: 2rem;
+  position: absolute;
+  top: -1.5rem;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.medal {
+  font-size: 2rem;
+}
+
+.podiumAvatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.podiumPlace.first .podiumAvatar {
+  width: 80px;
+  height: 80px;
+  font-size: 2rem;
+}
+
+.podiumName {
+  font-weight: 600;
+  font-size: 1rem;
+  text-align: center;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.podiumPlace.first .podiumName {
+  font-size: 1.2rem;
+}
+
+.podiumElo {
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: #d4af37;
+}
+
+.podiumPlace.first .podiumElo {
+  font-size: 1.5rem;
+}
+
+/* Entries List */
+.entries {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.entry {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  transition: all 0.2s;
+}
+
+.entry:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.entry.currentUser {
+  border-color: rgba(212, 175, 55, 0.5);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(244, 208, 63, 0.05) 100%);
+}
+
+.rank {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #999;
+  min-width: 50px;
+}
+
+.playerInfo {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #666 0%, #888 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.details {
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 0.25rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stats {
+  font-size: 0.85rem;
+  color: #999;
+}
+
+.elo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #d4af37;
+  min-width: 80px;
+  text-align: right;
+}
+
+@media (max-width: 768px) {
+  .leaderboard {
+    padding: 1rem;
+  }
+
+  .header h1 {
+    font-size: 1.5rem;
+  }
+
+  .podium {
+    padding: 1rem 0.5rem;
+    gap: 0.5rem;
+  }
+
+  .podiumPlace {
+    padding: 1rem;
+  }
+
+  .podiumPlace.first {
+    padding-top: 1.5rem;
+  }
+
+  .podiumAvatar {
+    width: 48px;
+    height: 48px;
+    font-size: 1.2rem;
+  }
+
+  .podiumPlace.first .podiumAvatar {
+    width: 64px;
+    height: 64px;
+    font-size: 1.5rem;
+  }
+
+  .podiumName {
+    font-size: 0.85rem;
+    max-width: 80px;
+  }
+
+  .podiumPlace.first .podiumName {
+    font-size: 1rem;
+  }
+
+  .entry {
+    padding: 1rem;
+  }
+
+  .rank {
+    min-width: 40px;
+    font-size: 1rem;
+  }
+
+  .elo {
+    font-size: 1.2rem;
+    min-width: 60px;
+  }
+}

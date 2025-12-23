@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Difficulty, GameSettings, Player, GameMode } from './engine/types';
+import { AuthProvider } from './contexts/AuthContext';
 import { Splash } from './screens/Splash';
 import { Home } from './screens/Home';
 import { Game } from './screens/Game';
@@ -9,10 +10,14 @@ import { DifficultySelect } from './screens/DifficultySelect';
 import { CreateRoom } from './screens/CreateRoom';
 import { JoinRoom } from './screens/JoinRoom';
 import { OnlineGame } from './screens/OnlineGame';
+import { Login } from './screens/Login';
+import { Register } from './screens/Register';
+import { Stats } from './screens/Stats';
+import { Leaderboard } from './screens/Leaderboard';
 import { Modal } from './components/Modal';
 import { Button } from './components/Button';
 
-type Screen = 'splash' | 'home' | 'game' | 'rules' | 'settings' | 'difficulty-select' | 'online-menu' | 'create-room' | 'join-room' | 'online-game';
+type Screen = 'splash' | 'home' | 'game' | 'rules' | 'settings' | 'difficulty-select' | 'online-menu' | 'create-room' | 'join-room' | 'online-game' | 'login' | 'register' | 'stats' | 'leaderboard';
 
 const DEFAULT_SETTINGS: GameSettings = {
   mandatoryCaptures: true,
@@ -21,7 +26,7 @@ const DEFAULT_SETTINGS: GameSettings = {
   theme: 'charcoal',
 };
 
-function App() {
+function AppContent() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('splash');
   const [gameMode, setGameMode] = useState<GameMode | null>(null);
   const [difficulty, setDifficulty] = useState<Difficulty>('casual');
@@ -29,6 +34,7 @@ function App() {
   const [winner, setWinner] = useState<Player | null>(null);
   const [roomCode, setRoomCode] = useState<string>('');
   const [preferredColor, setPreferredColor] = useState<Player | undefined>(undefined);
+  const [returnToScreen, setReturnToScreen] = useState<Screen>('home');
 
   useEffect(() => {
     const savedSettings = localStorage.getItem('kingme-settings');
@@ -67,6 +73,32 @@ function App() {
 
   const handlePlayOnline = () => {
     setCurrentScreen('online-menu');
+  };
+
+  const handleShowLogin = () => {
+    setReturnToScreen(currentScreen);
+    setCurrentScreen('login');
+  };
+
+  const handleShowRegister = () => {
+    setReturnToScreen(currentScreen);
+    setCurrentScreen('register');
+  };
+
+  const handleAuthSuccess = () => {
+    setCurrentScreen(returnToScreen);
+  };
+
+  const handleSkipAuth = () => {
+    setCurrentScreen(returnToScreen);
+  };
+
+  const handleShowStats = () => {
+    setCurrentScreen('stats');
+  };
+
+  const handleShowLeaderboard = () => {
+    setCurrentScreen('leaderboard');
   };
 
   const handleCreateRoom = (newRoomCode: string, color: Player) => {
@@ -127,7 +159,34 @@ function App() {
           onPlayOnline={handlePlayOnline}
           onShowRules={() => setCurrentScreen('rules')}
           onShowSettings={() => setCurrentScreen('settings')}
+          onShowStats={handleShowStats}
+          onShowLeaderboard={handleShowLeaderboard}
+          onLogin={handleShowLogin}
         />
+      )}
+
+      {currentScreen === 'login' && (
+        <Login
+          onSuccess={handleAuthSuccess}
+          onSwitchToRegister={handleShowRegister}
+          onSkip={handleSkipAuth}
+        />
+      )}
+
+      {currentScreen === 'register' && (
+        <Register
+          onSuccess={handleAuthSuccess}
+          onSwitchToLogin={handleShowLogin}
+          onSkip={handleSkipAuth}
+        />
+      )}
+
+      {currentScreen === 'stats' && (
+        <Stats onBack={() => setCurrentScreen('home')} />
+      )}
+
+      {currentScreen === 'leaderboard' && (
+        <Leaderboard onBack={() => setCurrentScreen('home')} />
       )}
 
       {currentScreen === 'difficulty-select' && (
@@ -215,6 +274,16 @@ function App() {
         }
       />
     </>
+  );
+}
+
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 

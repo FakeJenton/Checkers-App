@@ -3,6 +3,7 @@ import { GameState, Move, Player, GameSettings } from '../engine/types';
 import { OnlineGameService, ConnectionStatus } from '../services/onlineGame';
 import { createInitialGameState } from '../engine/gameState';
 import { Board } from '../components/Board';
+import { useAuth } from '../contexts/AuthContext';
 import styles from './OnlineGame.module.css';
 
 interface OnlineGameProps {
@@ -14,6 +15,7 @@ interface OnlineGameProps {
 }
 
 export function OnlineGame({ roomCode, preferredColor, settings, onQuit, onWin }: OnlineGameProps) {
+  const { user } = useAuth();
   const [gameState, setGameState] = useState<GameState>(() => createInitialGameState(settings.mandatoryCaptures));
   const [yourColor, setYourColor] = useState<Player | 'spectator'>('spectator');
   const [players, setPlayers] = useState({ red: false, black: false });
@@ -45,14 +47,14 @@ export function OnlineGame({ roomCode, preferredColor, settings, onQuit, onWin }
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    // Join the room
-    onlineService.joinRoom(roomCode, preferredColor);
+    // Join the room with optional user ID
+    onlineService.joinRoom(roomCode, preferredColor, user?.id);
 
     // Cleanup on unmount
     return () => {
       onlineService.disconnect();
     };
-  }, [roomCode, preferredColor, onlineService]);
+  }, [roomCode, preferredColor, user?.id, onlineService]);
 
   const handleMove = useCallback((move: Move) => {
     console.log('🎯 handleMove called');

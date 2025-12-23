@@ -1,5 +1,8 @@
 import type * as Party from "partykit/server";
 
+// API URL for game recording
+const API_URL = process.env.API_URL || 'http://localhost:3001';
+
 // Import game engine types and functions
 interface Position {
   row: number;
@@ -40,15 +43,20 @@ interface RoomState {
     red: string | null; // Player ID (not connection ID)
     black: string | null; // Player ID (not connection ID)
   };
+  userIds: {
+    red: number | null; // Database user ID for red player
+    black: number | null; // Database user ID for black player
+  };
   playerConnections: Map<string, string>; // Map player ID to current connection ID
   spectators: Set<string>;
   createdAt: number;
   lastActivity: number;
+  dbGameId: number | null; // Database game ID for recording
 }
 
 // Message types
 type ClientMessage =
-  | { type: 'join'; preferredColor?: 'red' | 'black'; playerId: string }
+  | { type: 'join'; preferredColor?: 'red' | 'black'; playerId: string; userId?: number }
   | { type: 'move'; move: Move }
   | { type: 'restart' }
   | { type: 'ping' };
@@ -78,10 +86,15 @@ export default class CheckersServer implements Party.Server {
         red: null,
         black: null,
       },
+      userIds: {
+        red: null,
+        black: null,
+      },
       playerConnections: new Map(),
       spectators: new Set(),
       createdAt: Date.now(),
       lastActivity: Date.now(),
+      dbGameId: null,
     };
   }
 
@@ -91,6 +104,89 @@ export default class CheckersServer implements Party.Server {
       this.roomState = this.initializeRoomState();
     }
     return this.roomState;
+  }
+
+  // API Helper: Create game in database
+  private async createGameInDB(redUserId: number | null, blackUserId: number | null): Promise<number | null> {
+    // Only create game if at least one player is logged in
+    if (!redUserId && !blackUserId) {
+      console.log(`[${this.room.id}] No logged-in users, skipping game recording`);
+      return null;
+    }
+
+    try {
+      console.log(`[${this.room.id}] Creating game in database...`);
+      const response = await fetch(`${API_URL}/api/games`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          red_player_id: redUserId,
+          black_player_id: blackUserId,
+          room_code: this.room.id,
+        }),
+      });
+
+      if (!response.ok) {
+        console.error(`[${this.room.id}] Failed to create game:`, response.statusText);
+        return null;
+      }
+
+      const data = await response.json();
+      console.log(`[${this.room.id}] Game created in DB with ID:`, data.game_id);
+      return data.game_id;
+    } catch (error) {
+      console.error(`[${this.room.id}] Error creating game in DB:`, error);
+      return null;
+    }
+  }
+
+  // API Helper: Record move in database
+  private async recordMoveInDB(gameId: number, moveNumber: number, player: Player, move: Move): Promise<void> {
+    if (!gameId) return;
+
+    try {
+      await fetch(`${API_URL}/api/games/${gameId}/moves`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          move_number: moveNumber,
+          player,
+          from_row: move.from.row,
+          from_col: move.from.col,
+          to_row: move.to.row,
+          to_col: move.to.col,
+          captured_positions: move.captures.length > 0 ? move.captures : null,
+          is_king_promotion: move.isPromotion,
+        }),
+      });
+    } catch (error) {
+      console.error(`[${this.room.id}] Error recording move:`, error);
+    }
+  }
+
+  // API Helper: Complete game in database
+  private async completeGameInDB(gameId: number, winner: Player): Promise<void> {
+    if (!gameId) return;
+
+    try {
+      console.log(`[${this.room.id}] Completing game ${gameId} in DB, winner: ${winner}`);
+      await fetch(`${API_URL}/api/games/${gameId}/complete`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          winner,
+        }),
+      });
+      console.log(`[${this.room.id}] Game completed in DB`);
+    } catch (error) {
+      console.error(`[${this.room.id}] Error completing game:`, error);
+    }
   }
 
   // Create initial game state
@@ -260,8 +356,9 @@ export default class CheckersServer implements Party.Server {
         case 'join': {
           const playerId = msg.playerId;
           const preferredColor = msg.preferredColor;
+          const userId = msg.userId;
 
-          console.log(`[${this.room.id}] Join request from connection ${sender.id}, player ID: ${playerId}, preferred: ${preferredColor}`);
+          console.log(`[${this.room.id}] Join request from connection ${sender.id}, player ID: ${playerId}, user ID: ${userId}, preferred: ${preferredColor}`);
           console.log(`[${this.room.id}] Current state:`, {
             red: state.players.red,
             black: state.players.black,
@@ -286,28 +383,36 @@ export default class CheckersServer implements Party.Server {
           if (preferredColor && !state.players[preferredColor]) {
             // Assign preferred color if available
             state.players[preferredColor] = playerId;
+            if (userId) state.userIds[preferredColor] = userId;
             assignedColor = preferredColor;
-            console.log(`[${this.room.id}] Assigned player ${playerId} to preferred color ${preferredColor}`);
+            console.log(`[${this.room.id}] Assigned player ${playerId} (user ${userId}) to preferred color ${preferredColor}`);
           } else if (!state.players.red) {
             // Assign red if available
             state.players.red = playerId;
+            if (userId) state.userIds.red = userId;
             assignedColor = 'red';
-            console.log(`[${this.room.id}] Assigned player ${playerId} to red (first available)`);
+            console.log(`[${this.room.id}] Assigned player ${playerId} (user ${userId}) to red (first available)`);
           } else if (!state.players.black) {
             // Assign black if available
             state.players.black = playerId;
+            if (userId) state.userIds.black = userId;
             assignedColor = 'black';
-            console.log(`[${this.room.id}] Assigned player ${playerId} to black (second available)`);
+            console.log(`[${this.room.id}] Assigned player ${playerId} (user ${userId}) to black (second available)`);
           } else {
             // Make spectator
             state.spectators.add(playerId);
             console.log(`[${this.room.id}] Player ${playerId} made spectator (room full)`);
           }
 
-          // Initialize game state if both players connected
+          // Initialize game state and create DB record if both players connected
           if (state.players.red && state.players.black && !state.gameState) {
             state.gameState = this.createInitialGameState();
             console.log(`[${this.room.id}] Both players connected, initializing game`);
+
+            // Create game in database if not already created
+            if (!state.dbGameId) {
+              state.dbGameId = await this.createGameInDB(state.userIds.red, state.userIds.black);
+            }
           }
 
           // Broadcast state to all
@@ -379,7 +484,23 @@ export default class CheckersServer implements Party.Server {
 
           // Apply move
           console.log(`[${this.room.id}] ✅ Applying move`);
+          const previousGameState = state.gameState;
           state.gameState = this.applyMove(state.gameState, msg.move);
+
+          // Record move in database
+          if (state.dbGameId) {
+            const moveNumber = state.gameState.moveHistory.length;
+            await this.recordMoveInDB(state.dbGameId, moveNumber, playerColor, msg.move);
+          }
+
+          // Check if game is complete
+          if (state.gameState.winner && !previousGameState.winner) {
+            console.log(`[${this.room.id}] 🏆 Game over! Winner: ${state.gameState.winner}`);
+            // Complete game in database
+            if (state.dbGameId) {
+              await this.completeGameInDB(state.dbGameId, state.gameState.winner);
+            }
+          }
 
           // Broadcast updated state
           this.broadcastState();
@@ -409,6 +530,12 @@ export default class CheckersServer implements Party.Server {
 
           // Reset game state
           state.gameState = this.createInitialGameState();
+
+          // Create new game in database for rematch
+          if (state.userIds.red || state.userIds.black) {
+            state.dbGameId = await this.createGameInDB(state.userIds.red, state.userIds.black);
+          }
+
           this.broadcastState();
 
           break;
